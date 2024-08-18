@@ -15,13 +15,17 @@ fn main() -> io::Result<()> {
     }
 
     let filename = &args[1];
-    let contents = read_to_string(filename)?;
-    let read = contents.trim();
-    let lexer = Lexer::new(read);
-    let mut parser = parser::Parser::new(lexer);
-    let program = parser.parse();
-    for statement in program {
-        println!("{:?}", statement);
+    if filename == "repl" {
+        repl::start()
+    } else {
+        let contents = read_to_string(filename)?;
+        let read = contents.trim();
+        let lexer = Lexer::new(read);
+        let mut parser = parser::Parser::new(lexer);
+        let program = parser.parse();
+        for statement in program {
+            println!("{:?}", statement);
+        }
     }
 
     // repl::start();

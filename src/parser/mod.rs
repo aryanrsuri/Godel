@@ -170,19 +170,19 @@ impl Parser {
     }
 
     pub fn parse_type_expression(&mut self) -> Option<Expression> {
-        // peek is right arrow
-        if !self.if_peek_advance(Token::Rarrow) {
+        let mut types = vec![];
+        println!("curr {:#?} peek {:#?}", self.current, self.peek);
+        if !self.if_peek_advance(Token::Vbar) {
             return None;
         }
-        // at the right arrow
 
-        let mut types = vec![];
         self.advance();
         match self.parse_identifier() {
             Some(ident) => types.push(ident),
             None => return None,
         };
 
+        println!("curr {:#?} peek {:#?}", self.current, self.peek);
         while self.peek_token_is(Token::Vbar) {
             self.advance();
             self.advance();
