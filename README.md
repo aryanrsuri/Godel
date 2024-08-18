@@ -1,5 +1,10 @@
-# Godel Language Specification
+# Gödel Language Specification
 
+## Introduction
+
+    Name: Gödel
+    Purpose: Functional and mathematical PL with a pure syntax.
+    Zen: Strive to be orthogonal and linear. To be the lowest overhead and highest purity code.
 
 ## Example File
 ```
@@ -30,21 +35,11 @@ let Cell = type
 
 ```
 
-Not Supported Yet:
+## Not Supported Yet (From Below Spec)
 - For loops
 - Hashes
 - Tagged Union 
 - Evaluation
-
-
-
-
-## Introduction
-
-    Name: Godel
-    Paradigm: Functional, strongly-typed, with support for algebraic data types and function piping.
-    Purpose: Designed for mathematical and functional programming with a clean and expressive syntax.
-    Zen: Strive to be orthogonal and linear. To be the lowest overhead and highest purity code.
 
 ## Lexical Structure
 
