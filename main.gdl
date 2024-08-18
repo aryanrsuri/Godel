@@ -1,4 +1,4 @@
-// Currently Supported Statements
+// Example of currently supported statements;
 let x = 10;
 let y = 10;
 let add = fn x,y -> x+y;
@@ -6,10 +6,13 @@ let real = fn x -> if x > 0 { Ok x; } else { None; };
 let divide = fn x,y -> if y == 0 { Error "Divide by Zero"; } else { Ok x / y; }; 
 let get_10 = fn -> 10;
 let ternary = fn () -> if current_time > 100000 { get_10 } else { 100000 };
-add x,y; 
-real 10;
-divide 10,0;
-x,y <- add
-x,y : add
+let lists = fn x,y,z -> if x > y * z { {x,y,z} } else { Error };
+let strings = "This is a String";
+add(x,y); 
+real(10);
+divide(10,0);
+
 
 // Not supported yet
+For loops
+Hashes
