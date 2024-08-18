@@ -13,33 +13,50 @@ let x = 10;
 let y = 10;
 let add = fn x,y -> x+y;
 let real = fn x -> if x > 0 { Ok x } else { None };
-let divide = fn x,y -> if y == 0 { Error } else { Ok x / y }; 
+let divide = fn x,y -> if y == 0 { Error } else { Ok x / y };
+let mask = fn x,y -> if x == y { 0 } else { x % y };
 let get_10 = fn () -> 10;
 let ternary = fn () -> if current_time > 100000 { get_10 } else { 100000 };
-let lists = fn x,y,z -> if x > y * z { Ok {x,y,z} } else { Error };
+let result_array = fn x,y,z -> if x > y * z { Ok {x,y,z} } else { Error };
+let factorial = fn n -> if n == 0 { 1 } else { n * factorial (n - 1) };
 let multi_line = fn () -> {
   let x = 5;
   let y = 6;
   x + y
 };
 let strings = "This is a String";
-let new_list = 0 :: lists;
+let list = {0, 1, 2};
+
+// Sets are generated with implicit for systnax { x : [0..2] -> x }
+// Or by casting a list to set:
+// let set_from_list = {0, 1, 1, 3}.set
+// $ {0, 1, 3}
+
+let array = [1, 2];
+let new_list = 0 :: list;
+let cardinality = #{0, 1, 2};
+let elem = array.0;
 add(x,y); 
 real(10);
 divide(10,0);
 let Cell = type
-| Dormant
+| Dormant 
 | Alive
 | Dead
+| Health 
 ;
 
 ```
 
 ## Not Supported Yet (From Below Spec)
-- For loops
+- For / Set-builder notation
+- Sets
 - Hashes
-- Tagged Union 
+- Function piping
+- Pattern Matching types
+- Union primitive types i.e. Tagged Unions
 - Evaluation
+- Array access
 
 ## Lexical Structure
 
@@ -110,6 +127,9 @@ the domain of X and rage Y for which given any x, assigns a unique map fn x → 
 
 ```
     for { x in [0..10] -> x * x };
+    let evens = for { x in [0..20] : if x % 2 == 0 { x } else { None } };
+    let factorial = fn n -> if n == 0 { 1 } else { n * factorial (n - 1) };
+    let factorials = for { x in [1..5] : factorial x };
 
 ```
 
@@ -127,13 +147,14 @@ List : Composite collection of one primitive type
 
 Union : Sum type that can be one of several variants.
 
-        Syntax: let <type> = union -> | <variant> -> <type> | ... ;
+        Syntax: let <type> = type | <variant> -> <type> | ... ;
         Example:
 ```
-        let Result = union ->
+        let Result = type
         | Ok -> Int
         | None
-        | Error;
+        | Error
+        ;
 ```
 
 ## Matching
@@ -143,17 +164,22 @@ Matching is a powerful data inspection protocol, for almost everything except fu
         Syntax: match <expression> in | <pattern> -> <expression> | ... ;
         Example:
 ```
-        let Expr = union ->
-        | Const -> Int
-        | Add -> (Expr, Expr)
-        | Mul -> (Expr, Expr)
+        
+        let Cell = type
+        | Alive Int
+        | Dead Int
+        | Dormant
+        ;
+        
+        let partition = fn cell -> match cell 
+        | Alive n -> attack(n) 
+        | Dead n -> revive(n)
+        | Dormant () -> ()
         ;
 
-        let eval = fn expr -> match expr in
-          | Const n -> n
-          | Add (e1, e2) -> eval e1 + eval e2
-          | Mul (e1, e2) -> eval e1 * eval e2
-        ;
+        let birth = fn () -> Cell.Dead : 0 ;
+        let Cells = for { x <- [0..64] : birth }
+        for { cell <- Cells : partition(cell) }
 
 ```
 
@@ -168,52 +194,4 @@ Matching is a powerful data inspection protocol, for almost everything except fu
         sum x y;
         real 10;
         divide 10 0;
-```
-
-## Example Programs
-Example 1: Basic Arithmetic and Functions
-
-```
-let x = 10;
-let y = 20;
-let sum = fn x, y -> x + y;
-let result = sum x y;
-```
-
-Example 2: Conditional Expressions and Result Type
-
-```
-let real = fn x -> if x > 0 { Ok x } else { None };
-let divide = fn x, y -> if y == 0 { Error } else { Ok x / y };
-
-real 10;
-divide 10 0;
-```
-
-Example 3: Function Piping and Set Builder
-
-```
-let list_of_ints = parse filepath 
-|> buffer_to_lines 
-|> extract_int_from_lines
-|> collect_to_list;
-
-
-```
-
-Example 4: Recursive Function
-
-```
-let factorial = fn n -> if n == 0 { 1 } else { n * factorial (n - 1) };
-let result = factorial 5;
-result;  
-
-```
-
-Example 5: Set-builder / For loop notation
-```
-let evens = for { x in [0..20] : if x % 2 == 0 { x } else { None } };
-let factorial = fn n -> if n == 0 { 1 } else { n * factorial (n - 1) };
-let factorials = for { x in [1..5] : factorial x };
-
 ```
