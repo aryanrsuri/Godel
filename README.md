@@ -126,10 +126,10 @@ the domain of X and rage Y for which given any x, assigns a unique map fn x → 
     Example:
 
 ```
-    for { x in [0..10] -> x * x };
-    let evens = for { x in [0..20] : if x % 2 == 0 { x } else { None } };
+    for { x <- [0..10] : x * x };
+    let evens = for { x <- [0..20] : if x % 2 == 0 { x } else { None } };
     let factorial = fn n -> if n == 0 { 1 } else { n * factorial (n - 1) };
-    let factorials = for { x in [1..5] : factorial x };
+    let factorials = for { x <- [1..5] : factorial x };
 
 ```
 
@@ -140,7 +140,7 @@ List : Composite collection of one primitive type
         Syntax: let <type> = [ 'x(0), 'x(1), 'x(2)];
         Example:
 ```
-        let l0= [1, 2, 3, 4];
+        let l0= {1, 2, 3, 4};
         let l1 = 0 :: l0;
         
 ```
@@ -148,10 +148,11 @@ List : Composite collection of one primitive type
 Union : Sum type that can be one of several variants.
 
         Syntax: let <type> = type | <variant> -> <type> | ... ;
+        Future release will have tagged types (of Int etc);
         Example:
 ```
         let Result = type
-        | Ok -> Int
+        | Ok 
         | None
         | Error
         ;
@@ -166,8 +167,8 @@ Matching is a powerful data inspection protocol, for almost everything except fu
 ```
         
         let Cell = type
-        | Alive Int
-        | Dead Int
+        | Alive of Int
+        | Dead of Int
         | Dormant
         ;
         
