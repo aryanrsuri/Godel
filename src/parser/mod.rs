@@ -111,6 +111,7 @@ impl Parser {
     pub fn parse_expression(&mut self, precendence: Precendence) -> Option<Expression> {
         // Prefix
         let mut left = match self.current {
+            Token::String(_) => self.parse_string_expression(),
             Token::Identifier(_) => self.parse_identifier_expression(),
             Token::Integer(_) => self.parse_integer_expression(),
             Token::True | Token::False => self.parse_boolean_expression(),
@@ -118,12 +119,14 @@ impl Parser {
             Token::If => self.parse_if_expression(),
             Token::Fn => self.parse_function_expression(),
             Token::LeftParen => self.parse_grouped_expression(),
+            Token::LeftBrace => Some(Expression::Literal(Literal::List(
+                self.parse_expression_list(Token::RightBrace),
+            ))),
             Token::Ok => self.parse_ok_expression(),
             Token::Error => self.parse_error_expression(),
             Token::Unit | Token::None => Some(Expression::None),
             _ => return None,
         };
-        _ = precendence;
         while !self.peek_token_is(Token::Semicolon) && precendence < self.peek_precendence() {
             match self.peek {
                 Token::Plus
@@ -132,6 +135,7 @@ impl Parser {
                 | Token::Asterisk
                 | Token::Equal
                 | Token::Notequal
+                | Token::Modulo
                 | Token::Lt
                 | Token::Gt => {
                     self.advance();
@@ -284,7 +288,7 @@ impl Parser {
     }
     pub fn parse_expression_list(&mut self, delimiter: Token) -> Option<Vec<Expression>> {
         let mut list = vec![];
-        // FIXME: make peektokenis accept a reference
+        // FIXME: make peek token is accept a reference
         if self.peek_token_is(delimiter.clone()) {
             self.advance();
             return Some(list);
@@ -320,6 +324,7 @@ impl Parser {
             Token::Notequal => Infix::NotEqual,
             Token::Lt => Infix::LessThan,
             Token::Gt => Infix::GreaterThan,
+            Token::Modulo => Infix::Modulo,
             _ => return None,
         };
 
@@ -374,6 +379,14 @@ impl Parser {
 
     pub fn parse_identifier(&mut self) -> Option<Identifier> {
         return Some(self.current.clone());
+    }
+
+    pub fn parse_string_expression(&mut self) -> Option<Expression> {
+        let slice = match &self.current {
+            Token::String(s) => s.clone(),
+            _ => return None,
+        };
+        return Some(Expression::Literal(Literal::String(slice)));
     }
 
     pub fn parse_identifier_expression(&mut self) -> Option<Expression> {

@@ -15,10 +15,9 @@ pub enum Infix {
     Multiply,
     Equal,
     NotEqual,
-    GreaterThanEqual,
     GreaterThan,
-    LessThanEqual,
     LessThan,
+    Modulo,
 }
 
 #[derive(Debug)]
@@ -33,7 +32,7 @@ pub enum Literal {
     Integer(i64),
     String(String),
     Boolean(bool),
-    List(Vec<Expression>),
+    List(Option<Vec<Expression>>),
 }
 
 #[derive(Debug)]

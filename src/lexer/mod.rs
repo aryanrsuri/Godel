@@ -5,6 +5,7 @@ pub enum Token {
     Illegal,
     Eof,
     Identifier(String),
+    String(String),
     Integer(String),
     Assign,
     Cons,
@@ -100,6 +101,22 @@ impl Lexer {
         self.input[self.next_cur]
     }
 
+    pub fn read_string(&mut self) -> Token {
+        self.read();
+        // on ident essentially
+        let current = self.cur;
+        loop {
+            if is_alphanumeric(self.ch) {
+                self.read();
+            } else {
+                break;
+            }
+        }
+
+        // TODO: Force end delimter to be doublequote or error
+        self.read();
+        Token::String(self.input[current..self.cur - 1].iter().collect::<String>())
+    }
     pub fn read_number(&mut self) -> Token {
         let current = self.cur;
         loop {
@@ -223,6 +240,7 @@ impl Lexer {
             '>' => Token::Gt,
             '{' => Token::LeftBrace,
             '}' => Token::RightBrace,
+            '"' => return self.read_string(),
             '0'..='9' => return self.read_number(),
             'a'..='z' | 'A'..='Z' => return self.read_identifier(),
             '\0' => Token::Eof,
