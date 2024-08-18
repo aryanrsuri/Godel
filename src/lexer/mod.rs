@@ -7,6 +7,7 @@ pub enum Token {
     Identifier(String),
     String(String),
     Integer(String),
+    Comment(String),
     Assign,
     Cons,
     Plus,
@@ -35,14 +36,13 @@ pub enum Token {
     Fslash,
     Equal,
     Notequal,
-    Comment,
     Bang,
     Else,
     Return,
     In,
     If,
     For,
-    Union,
+    Type,
     False,
     True,
     Vbar,
@@ -53,6 +53,7 @@ pub enum Token {
     Error,
     Fn,
     Let,
+    Cardinal,
 }
 
 #[derive(Debug)]
@@ -129,6 +130,18 @@ impl Lexer {
         return Token::Integer(self.input[current..self.cur].iter().collect::<String>());
     }
 
+    pub fn read_comment(&mut self) -> Token {
+        let current = self.cur;
+        loop {
+            if is_alphanumeric(self.ch) || self.ch == ' ' || self.ch == '\t' {
+                self.read();
+            } else {
+                break;
+            }
+        }
+        Token::Comment(self.input[current..self.cur].iter().collect::<String>())
+    }
+
     pub fn read_identifier(&mut self) -> Token {
         let current = self.cur;
         loop {
@@ -146,7 +159,7 @@ impl Lexer {
             "else" => Token::Else,
             "if" => Token::If,
             "for" => Token::For,
-            "union" => Token::Union,
+            "type" => Token::Type,
             "true" => Token::True,
             "false" => Token::False,
             "Ok" => Token::Ok,
@@ -233,9 +246,28 @@ impl Lexer {
                     Token::Lt
                 }
             }
-            '/' => Token::Fslash,
-            '*' => Token::Asterisk,
+            '/' => {
+                if self.peek() == '/' {
+                    self.read();
+                    self.read();
+                    let comment = self.read_comment();
+                    return comment;
+                } else {
+                    Token::Fslash
+                }
+            }
+            '[' => Token::LeftBracket,
+            ']' => Token::RightBracket,
+            '*' => {
+                if self.peek() == '*' {
+                    self.read();
+                    Token::Exponent
+                } else {
+                    Token::Asterisk
+                }
+            }
             '&' => Token::Ampersand,
+            '#' => Token::Cardinal,
             '%' => Token::Modulo,
             '>' => Token::Gt,
             '{' => Token::LeftBrace,

@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use crate::{ast::*, lexer::*};
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Precendence {
@@ -9,6 +7,7 @@ pub enum Precendence {
     Sum,
     Product,
     Prefix,
+    Cons,
     Call,
 }
 
@@ -17,7 +16,8 @@ pub fn token_to_precedence(token: &Token) -> Precendence {
         Token::Equal | Token::Notequal => Precendence::Equals,
         Token::Lt | Token::Gt => Precendence::Comparison,
         Token::Plus | Token::Minus => Precendence::Sum,
-        Token::Fslash | Token::Asterisk | Token::Modulo => Precendence::Product,
+        Token::Fslash | Token::Asterisk | Token::Modulo | Token::Exponent => Precendence::Product,
+        Token::Cons => Precendence::Cons,
         Token::LeftParen => Precendence::Call,
         _ => Precendence::Lowest,
     }
@@ -92,7 +92,16 @@ impl Parser {
         return match self.current {
             Token::Let => self.parse_let_statement(),
             Token::Return => self.parse_return_statement(),
+            Token::Comment(_) => self.parse_comment_statement(),
             _ => self.parse_expression_statement(),
+        };
+    }
+
+    pub fn parse_comment_statement(&mut self) -> Option<Statement> {
+        // FIXME: Clone?
+        return match self.current.clone() {
+            Token::Comment(s) => Some(Statement::Comment(s)),
+            _ => return None,
         };
     }
 
@@ -115,13 +124,19 @@ impl Parser {
             Token::Identifier(_) => self.parse_identifier_expression(),
             Token::Integer(_) => self.parse_integer_expression(),
             Token::True | Token::False => self.parse_boolean_expression(),
-            Token::Bang | Token::Minus => self.parse_prefix_expression(),
+            Token::Bang | Token::Minus | Token::Cardinal => self.parse_prefix_expression(),
             Token::If => self.parse_if_expression(),
             Token::Fn => self.parse_function_expression(),
             Token::LeftParen => self.parse_grouped_expression(),
+            // { }
             Token::LeftBrace => Some(Expression::Literal(Literal::List(
                 self.parse_expression_list(Token::RightBrace),
             ))),
+            // [ ]
+            Token::LeftBracket => Some(Expression::Literal(Literal::List(
+                self.parse_expression_list(Token::RightBracket),
+            ))),
+            Token::Type => self.parse_type_expression(),
             Token::Ok => self.parse_ok_expression(),
             Token::Error => self.parse_error_expression(),
             Token::Unit | Token::None => Some(Expression::None),
@@ -133,9 +148,11 @@ impl Parser {
                 | Token::Minus
                 | Token::Fslash
                 | Token::Asterisk
+                | Token::Exponent
                 | Token::Equal
                 | Token::Notequal
                 | Token::Modulo
+                | Token::Cons
                 | Token::Lt
                 | Token::Gt => {
                     self.advance();
@@ -150,6 +167,33 @@ impl Parser {
             }
         }
         left
+    }
+
+    pub fn parse_type_expression(&mut self) -> Option<Expression> {
+        // peek is right arrow
+        if !self.if_peek_advance(Token::Rarrow) {
+            return None;
+        }
+        // at the right arrow
+
+        let mut types = vec![];
+        self.advance();
+        match self.parse_identifier() {
+            Some(ident) => types.push(ident),
+            None => return None,
+        };
+
+        while self.peek_token_is(Token::Vbar) {
+            self.advance();
+            self.advance();
+
+            match self.parse_identifier() {
+                Some(ident) => types.push(ident),
+                None => return None,
+            };
+        }
+
+        Some(Expression::Type(types))
     }
 
     pub fn parse_function_expression(&mut self) -> Option<Expression> {
@@ -325,6 +369,8 @@ impl Parser {
             Token::Lt => Infix::LessThan,
             Token::Gt => Infix::GreaterThan,
             Token::Modulo => Infix::Modulo,
+            Token::Exponent => Infix::Exponent,
+            Token::Cons => Infix::Cons,
             _ => return None,
         };
 
@@ -340,6 +386,7 @@ impl Parser {
             Token::Bang => Prefix::Not,
             Token::Minus => Prefix::Minus,
             Token::Plus => Prefix::Plus,
+            Token::Cardinal => Prefix::Cardinal,
             _ => return None,
         };
 

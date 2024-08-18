@@ -5,6 +5,7 @@ pub enum Prefix {
     Plus,
     Minus,
     Not,
+    Cardinal,
 }
 
 #[derive(PartialEq, Clone, Debug)]
@@ -13,17 +14,20 @@ pub enum Infix {
     Minus,
     Divide,
     Multiply,
+    Exponent,
     Equal,
     NotEqual,
     GreaterThan,
     LessThan,
     Modulo,
+    Cons,
 }
 
 #[derive(Debug)]
 pub enum Statement {
     Let(String, Expression),
     Return(Expression),
+    Comment(String),
     Expression(Expression),
 }
 
@@ -39,8 +43,11 @@ pub enum Literal {
 pub enum Expression {
     None,
     Identifier(Identifier),
+    // TODO: Refactor Ok,Exxor, None to a `Types` enum child of Expression
     Ok(Box<Expression>),
     Error,
+    Comment(String),
+    Type(Vec<Identifier>),
     Literal(Literal),
     Prefix(Prefix, Box<Expression>),
     Infix(Infix, Box<Expression>, Box<Expression>),
