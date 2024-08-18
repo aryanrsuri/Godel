@@ -22,7 +22,8 @@ let new_list = 0 :: lists;
 add(x,y); 
 real(10);
 divide(10,0);
-let Cell = type -> Dormant
+let Cell = type
+| Dormant
 | Alive
 | Dead
 ;
