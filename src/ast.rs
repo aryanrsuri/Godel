@@ -1,0 +1,60 @@
+use crate::lexer;
+pub type Identifier = lexer::Token;
+#[derive(PartialEq, Clone, Debug)]
+pub enum Prefix {
+    Plus,
+    Minus,
+    Not,
+}
+
+#[derive(PartialEq, Clone, Debug)]
+pub enum Infix {
+    Plus,
+    Minus,
+    Divide,
+    Multiply,
+    Equal,
+    NotEqual,
+    GreaterThanEqual,
+    GreaterThan,
+    LessThanEqual,
+    LessThan,
+}
+
+#[derive(Debug)]
+pub enum Statement {
+    Let(String, Expression),
+    Return(Expression),
+    Expression(Expression),
+}
+
+#[derive(Debug)]
+pub enum Literal {
+    Integer(i64),
+    String(String),
+    Boolean(bool),
+    List(Vec<Expression>),
+}
+
+#[derive(Debug)]
+pub enum Expression {
+    None,
+    Identifier(Identifier),
+    Literal(Literal),
+    Prefix(Prefix, Box<Expression>),
+    Infix(Infix, Box<Expression>, Box<Expression>),
+    // for { x in [0..10] : x * x };
+    // TODO: For loops
+    // For()
+    If {
+        condition: Box<Expression>,
+        consequence: Program,
+        alternative: Option<Program>,
+    },
+    Fn {
+        parameter: Vec<Identifier>,
+        body: Program,
+    },
+}
+
+pub type Program = Vec<Statement>;
