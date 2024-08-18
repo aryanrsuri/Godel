@@ -106,7 +106,7 @@ impl Lexer {
         // on ident essentially
         let current = self.cur;
         loop {
-            if is_alphanumeric(self.ch) {
+            if is_alphanumeric(self.ch) || is_whitespace(self.ch) {
                 self.read();
             } else {
                 break;
