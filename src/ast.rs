@@ -40,6 +40,8 @@ pub enum Literal {
 pub enum Expression {
     None,
     Identifier(Identifier),
+    Ok(Box<Expression>),
+    Error,
     Literal(Literal),
     Prefix(Prefix, Box<Expression>),
     Infix(Infix, Box<Expression>, Box<Expression>),
@@ -54,6 +56,10 @@ pub enum Expression {
     Fn {
         parameter: Vec<Identifier>,
         body: Program,
+    },
+    Call {
+        map: Box<Expression>,
+        domain: Vec<Expression>,
     },
 }
 

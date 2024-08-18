@@ -1,10 +1,15 @@
+// Currently Supported Statements
 let x = 10;
 let y = 10;
 let add = fn x,y -> x+y;
 let real = fn x -> if x > 0 { Ok x; } else { None; };
 let divide = fn x,y -> if y == 0 { Error "Divide by Zero"; } else { Ok x / y; }; 
 let get_10 = fn -> 10;
-let squares = for { x <- [0..10] : x * x };
-add x y; 
+let ternary = fn () -> if current_time > 100000 { get_10 } else { 100000 };
+add x,y; 
 real 10;
-divide 10 0;
+divide 10,0;
+x,y <- add
+x,y : add
+
+// Not supported yet

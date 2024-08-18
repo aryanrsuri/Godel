@@ -18,6 +18,7 @@ pub fn token_to_precedence(token: &Token) -> Precendence {
         Token::Lt | Token::Gt => Precendence::Comparison,
         Token::Plus | Token::Minus => Precendence::Sum,
         Token::Fslash | Token::Asterisk | Token::Modulo => Precendence::Product,
+        Token::LeftParen => Precendence::Call,
         _ => Precendence::Lowest,
     }
 }
@@ -88,7 +89,6 @@ impl Parser {
     }
 
     pub fn parse_statement(&mut self) -> Option<Statement> {
-        println!("Current is {:#?}", self.current);
         return match self.current {
             Token::Let => self.parse_let_statement(),
             Token::Return => self.parse_return_statement(),
@@ -118,6 +118,9 @@ impl Parser {
             Token::If => self.parse_if_expression(),
             Token::Fn => self.parse_function_expression(),
             Token::LeftParen => self.parse_grouped_expression(),
+            Token::Ok => self.parse_ok_expression(),
+            Token::Error => self.parse_error_expression(),
+            Token::Unit | Token::None => Some(Expression::None),
             _ => return None,
         };
         _ = precendence;
@@ -133,6 +136,11 @@ impl Parser {
                 | Token::Gt => {
                     self.advance();
                     left = self.parse_infix_expression(left.unwrap());
+                }
+                Token::LeftParen => {
+                    // TODO: Find a way to do this without needing parens
+                    self.advance();
+                    left = self.parse_call_expression(left.unwrap());
                 }
                 _ => return left,
             }
@@ -155,7 +163,6 @@ impl Parser {
             return None;
         }
 
-        // println!("Should be at the leftbrace for current {:#?}", self.current);
         let body = if self.if_peek_advance(Token::LeftBrace) {
             self.parse_block_fn_statement()
         } else {
@@ -233,12 +240,7 @@ impl Parser {
             None => return None,
         };
         self.advance();
-        println!("Should be at the leftbrace for current {:#?}", self.current);
         let consuequence = self.parse_block_statement();
-        println!(
-            "Should be at the rightbrace for current {:#?} peek {:#?}",
-            self.current, self.peek
-        );
         let mut alternative: Option<Program> = None;
         if self.peek_token_is(Token::Else) {
             self.advance();
@@ -270,6 +272,44 @@ impl Parser {
         )))
     }
 
+    pub fn parse_call_expression(&mut self, left: Expression) -> Option<Expression> {
+        let parameters = match self.parse_expression_list(Token::RightParen) {
+            Some(params) => params,
+            None => return None,
+        };
+        Some(Expression::Call {
+            map: Box::new(left),
+            domain: parameters,
+        })
+    }
+    pub fn parse_expression_list(&mut self, delimiter: Token) -> Option<Vec<Expression>> {
+        let mut list = vec![];
+        // FIXME: make peektokenis accept a reference
+        if self.peek_token_is(delimiter.clone()) {
+            self.advance();
+            return Some(list);
+        }
+        self.advance();
+        match self.parse_expression(Precendence::Lowest) {
+            Some(expression) => list.push(expression),
+            None => return None,
+        }
+
+        while self.peek_token_is(Token::Comma) {
+            self.advance();
+            self.advance();
+            match self.parse_expression(Precendence::Lowest) {
+                Some(expression) => list.push(expression),
+                None => return None,
+            }
+        }
+
+        // FIXME: make peektokenis accept a reference
+        if !self.if_peek_advance(delimiter.clone()) {
+            return None;
+        }
+        Some(list)
+    }
     pub fn parse_infix_expression(&mut self, left: Expression) -> Option<Expression> {
         let infix = match self.current {
             Token::Plus => Infix::Plus,
@@ -304,6 +344,26 @@ impl Parser {
             .map(|expr| Expression::Prefix(prefix, Box::new(expr)))
     }
 
+    pub fn parse_error_expression(&mut self) -> Option<Expression> {
+        match &self.current {
+            Token::Error => Some(Expression::Error),
+            _ => None,
+        }
+    }
+
+    pub fn parse_ok_expression(&mut self) -> Option<Expression> {
+        match &self.current {
+            Token::Ok => {
+                self.advance();
+                match self.parse_expression(Precendence::Lowest) {
+                    Some(expression) => Some(Expression::Ok(Box::new(expression))),
+                    None => return None,
+                }
+            }
+            _ => None,
+        }
+    }
+
     pub fn parse_integer_expression(&mut self) -> Option<Expression> {
         let integer = match &self.current {
             Token::Integer(v) => v.parse::<i64>().unwrap(),
@@ -326,33 +386,37 @@ impl Parser {
         }
 
         self.advance();
+        let expression = match self.parse_expression(Precendence::Lowest) {
+            Some(expr) => expr,
+            None => return None,
+        };
         while !self.current_token_is(Token::Semicolon) {
             self.advance();
         }
 
-        return Some(Statement::Return(Expression::None));
+        return Some(Statement::Return(expression));
     }
 
     pub fn parse_let_statement(&mut self) -> Option<Statement> {
-        // FIXME: Use wildcard if_peek_advance()
-        // if !self.if_peek_advance(Token::Identifier(_)) {}
-
         let identifier = match &self.peek {
             Token::Identifier(s) => s.clone(),
             _ => return None,
         };
         self.advance();
 
-        // FIXME: Name could just be ident string not the whole token
         if !self.if_peek_advance(Token::Assign) {
             return None;
         }
 
-        // FIXME: Skipping expressions for now
+        self.advance();
+        let expression = match self.parse_expression(Precendence::Lowest) {
+            Some(expr) => expr,
+            None => return None,
+        };
         while !self.current_token_is(Token::Semicolon) {
             self.advance();
         }
 
-        return Some(Statement::Let(identifier, Expression::None));
+        return Some(Statement::Let(identifier, expression));
     }
 }

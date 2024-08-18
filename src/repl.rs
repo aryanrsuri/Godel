@@ -10,14 +10,8 @@ pub fn start() {
         if read.eq_ignore_ascii_case("exit") {
             break;
         }
-        let mut lexer = Lexer::new(read);
-        loop {
-            let token = lexer.advance();
-            if token == Token::Eof {
-                break;
-            } else {
-                println!("{:?}", token)
-            };
-        }
+        let lexer = Lexer::new(read);
+        let mut parser = parser::Parser::new(lexer);
+        println!("{:#?}", parser.parse());
     }
 }
