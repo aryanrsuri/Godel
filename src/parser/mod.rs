@@ -141,32 +141,39 @@ impl Parser {
     }
 
     pub fn parse_function_expression(&mut self) -> Option<Expression> {
-        // FIXME: Need to advance to have current be the first identifier?
         self.advance();
-        let parameters = match self.parse_fn_parameters() {
-            Some(params) => params,
-            None => return None,
+        let parameters = if self.current_token_is(Token::Unit) {
+            vec![Token::Unit]
+        } else {
+            match self.parse_fn_parameters() {
+                Some(params) => params,
+                None => return None,
+            }
         };
 
-        // FIXME: Should be at the last identifier peek is Lbrace
-        println!("current {:#?} {:#?}", self.current, self.peek);
         if !self.if_peek_advance(Token::Rarrow) {
             return None;
         }
 
-        if !self.if_peek_advance(Token::LeftBrace) {
-            return None;
-        }
+        // println!("Should be at the leftbrace for current {:#?}", self.current);
+        let body = if self.if_peek_advance(Token::LeftBrace) {
+            self.parse_block_fn_statement()
+        } else {
+            self.advance();
+            match self.parse_expression(Precendence::Lowest) {
+                Some(expression) => vec![Statement::Expression(expression)],
+                None => return None,
+            }
+        };
 
         Some(Expression::Fn {
             parameter: parameters,
-            body: self.parse_block_fn_statement(),
+            body: body,
         })
     }
 
     pub fn parse_fn_parameters(&mut self) -> Option<Vec<Identifier>> {
         let mut params: Vec<Identifier> = vec![];
-        // FIXME: Might need an advance here?
         match self.parse_identifier() {
             Some(ident) => params.push(ident),
             None => return None,

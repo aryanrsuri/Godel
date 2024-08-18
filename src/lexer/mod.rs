@@ -48,6 +48,7 @@ pub enum Token {
     Pipe,
     Ok,
     None,
+    Unit,
     Error,
     Fn,
     Let,
@@ -156,7 +157,14 @@ impl Lexer {
                 }
             }
             ';' => Token::Semicolon,
-            '(' => Token::LeftParen,
+            '(' => {
+                if self.peek() == ')' {
+                    self.read();
+                    Token::Unit
+                } else {
+                    Token::LeftParen
+                }
+            }
             ')' => Token::RightParen,
             ',' => Token::Comma,
             '+' => Token::Plus,
