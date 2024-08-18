@@ -1,7 +1,29 @@
-# Field Language Specification
+# Godel Language Specification
+```
+// Example of currently supported statements;
+let x = 10;
+let y = 10;
+let add = fn x,y -> x+y;
+let real = fn x -> if x > 0 { Ok x; } else { None; };
+let divide = fn x,y -> if y == 0 { Error "Divide by Zero"; } else { Ok x / y; }; 
+let get_10 = fn -> 10;
+let ternary = fn () -> if current_time > 100000 { get_10 } else { 100000 };
+let lists = fn x,y,z -> if x > y * z { {x,y,z} } else { Error };
+let strings = "This is a String";
+add(x,y); 
+real(10);
+divide(10,0);
+
+
+// Not supported yet
+For loops
+Hashes
+```
+
+
 ## Introduction
 
-    Name: Field
+    Name: Godel
     Paradigm: Functional, strongly-typed, with support for algebraic data types and function piping.
     Purpose: Designed for mathematical and functional programming with a clean and expressive syntax.
     Zen: Strive to be orthogonal and linear. To be the lowest overhead and highest purity code.
