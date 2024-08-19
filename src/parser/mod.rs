@@ -321,10 +321,19 @@ impl Parser {
     }
 
     pub fn parse_call_expression(&mut self, left: Expression) -> Option<Expression> {
-        let parameters = match self.parse_expression_list(Token::RightParen) {
-            Some(params) => params,
-            None => return None,
-        };
+        let mut parameters = vec![];
+        if self.peek_token_is(Token::Unit) {
+            self.advance();
+            if !self.if_peek_advance(Token::RightParen) {
+                return None;
+            }
+            parameters.push(Expression::Unit);
+        } else {
+            parameters = match self.parse_expression_list(Token::RightParen) {
+                Some(params) => params,
+                None => return None,
+            };
+        }
         Some(Expression::Call {
             map: Box::new(left),
             domain: parameters,

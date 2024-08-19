@@ -46,6 +46,7 @@ pub enum Expression {
     // TODO: Refactor Ok,Exxor, None to a `Types` enum child of Expression
     Ok(Box<Expression>),
     Error,
+    Unit,
     Comment(String),
     Type(Vec<Identifier>),
     Literal(Literal),
