@@ -118,7 +118,6 @@ impl Parser {
     }
 
     pub fn parse_expression(&mut self, precendence: Precendence) -> Option<Expression> {
-        // Prefix
         let mut left = match self.current {
             Token::String(_) => self.parse_string_expression(),
             Token::Identifier(_) => self.parse_identifier_expression(),
@@ -128,16 +127,15 @@ impl Parser {
             Token::If => self.parse_if_expression(),
             Token::Fn => self.parse_function_expression(),
             Token::LeftParen => self.parse_grouped_expression(),
-            // { }
             Token::LeftBrace => Some(Expression::Literal(Literal::List(
-                self.parse_expression_list(Token::RightBrace),
+                self.parse_expression_list(Token::RightBrace)?,
             ))),
-            // [ ]
             Token::LeftBracket => Some(Expression::Literal(Literal::List(
-                self.parse_expression_list(Token::RightBracket),
+                self.parse_expression_list(Token::RightBracket)?,
             ))),
             Token::Type => self.parse_type_expression(),
             Token::Ok => self.parse_ok_expression(),
+            Token::For => self.parse_for_expression(),
             Token::Error => self.parse_error_expression(),
             Token::Unit | Token::None => Some(Expression::None),
             _ => return None,
@@ -410,6 +408,17 @@ impl Parser {
             Token::Error => Some(Expression::Error),
             _ => None,
         }
+    }
+
+    pub fn parse_for_expression(&mut self) -> Option<Expression> {
+        //  C  P
+        // for { x <- [0..10] : x * x };
+        // for { x <- [1,2,3] | x = 0 };
+        if !self.if_peek_advance(Token::LeftBrace) {
+            return None;
+        }
+
+        None
     }
 
     pub fn parse_ok_expression(&mut self) -> Option<Expression> {

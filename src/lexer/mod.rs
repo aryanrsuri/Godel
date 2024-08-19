@@ -1,5 +1,3 @@
-use std::{ascii, ops::RangeBounds};
-
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
     Illegal,
@@ -12,7 +10,9 @@ pub enum Token {
     Cons,
     Plus,
     Ampersand,
-    And,
+    // And,
+    // LeftShift,
+    // RightShift,
     Modulo,
     Minus,
     Asterisk,
@@ -21,9 +21,7 @@ pub enum Token {
     Colon,
     Semicolon,
     LeftBracket,
-    LeftShift,
     RightBracket,
-    RightShift,
     Period,
     Range,
     LeftParen,

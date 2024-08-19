@@ -36,14 +36,14 @@ pub enum Literal {
     Integer(i64),
     String(String),
     Boolean(bool),
-    List(Option<Vec<Expression>>),
+    List(Vec<Expression>),
 }
 
 #[derive(Debug)]
 pub enum Expression {
     None,
     Identifier(Identifier),
-    // TODO: Refactor Ok,Exxor, None to a `Types` enum child of Expression
+    // TODO: Refactor Ok,Error, None to a `Types` enum child of Expression
     Ok(Box<Expression>),
     Error,
     Unit,
@@ -54,7 +54,10 @@ pub enum Expression {
     Infix(Infix, Box<Expression>, Box<Expression>),
     // for { x in [0..10] : x * x };
     // TODO: For loops
-    // For()
+    For {
+        map: Box<Expression>,
+        domain: Box<Expression>,
+    },
     If {
         condition: Box<Expression>,
         consequence: Program,
