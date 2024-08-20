@@ -11,3 +11,13 @@ pub enum Object {
     Type(Vec<Identifier>),
 }
 
+impl Object {
+    pub fn inspect(&self) {
+        return match self {
+            Object::Integer(value) => println!("OK {:?}", value),
+            Object::Boolean(value) => println!("OK {:?}", value),
+            Object::String(value) => println!("OK {:?}", value),
+            _ => println!("ERR Object Not Parsed"),
+        };
+    }
+}
