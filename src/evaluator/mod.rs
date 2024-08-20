@@ -30,14 +30,16 @@ impl Evaluator {
     pub fn eval_expression(&mut self, expression: &Expression) -> Option<Object> {
         match expression {
             Expression::Literal(literal) => Some(self.eval_literal(literal)),
-            _ => unreachable!("Only Integer works "),
+            _ => unreachable!("Only Literal(int,bool,string) works"),
         }
     }
 
     pub fn eval_literal(&mut self, literal: &Literal) -> Object {
         match literal {
             Literal::Integer(value) => Object::Integer(*value),
-            _ => unreachable!("Only Ineger works "),
+            Literal::Boolean(value) => Object::Boolean(*value),
+            Literal::String(value) => Object::String(value.clone()),
+            _ => unreachable!("List/Hash doesn't work."),
         }
     }
 }

@@ -47,7 +47,6 @@ pub enum Expression {
     Ok(Box<Expression>),
     Error,
     Unit,
-    Comment(String),
     Type(Vec<Identifier>),
     Literal(Literal),
     Prefix(Prefix, Box<Expression>),

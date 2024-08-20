@@ -4,6 +4,7 @@ pub enum Token {
     Eof,
     Identifier(String),
     String(String),
+    // TODO: Add float parsing (.) in integer
     Integer(String),
     Comment(String),
     Assign,
