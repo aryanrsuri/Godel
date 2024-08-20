@@ -1,6 +1,7 @@
 use super::*;
 use std::io::{self, Write};
-pub fn start() {
+
+pub fn start(eval: bool) {
     loop {
         print!("$ ");
         let mut input = String::new();
@@ -12,6 +13,13 @@ pub fn start() {
         }
         let lexer = Lexer::new(read);
         let mut parser = parser::Parser::new(lexer);
-        println!("{:#?}", parser.parse());
+        let program = parser.parse();
+        if eval {
+            let mut ev = evaluator::Evaluator::new();
+            let evaluated = ev.eval(&program);
+            println!("{:#?}", evaluated);
+        } else {
+            println!("{:#?}", program);
+        }
     }
 }

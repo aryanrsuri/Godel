@@ -1,7 +1,8 @@
-mod ast;
-mod lexer;
-mod parser;
-mod repl;
+pub mod ast;
+pub mod evaluator;
+pub mod lexer;
+pub mod parser;
+pub mod repl;
 use crate::lexer::*;
 use std::env;
 use std::fs::read_to_string;
@@ -16,8 +17,13 @@ fn main() -> io::Result<()> {
 
     let filename = &args[1];
     if filename == "repl" {
-        repl::start()
+        repl::start(false);
+        return Ok(());
     } else {
+        if filename == "eval" {
+            repl::start(true);
+            return Ok(());
+        }
         let contents = read_to_string(filename)?;
         let read = contents.trim();
         let lexer = Lexer::new(read);
