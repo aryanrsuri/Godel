@@ -123,7 +123,9 @@ impl Parser {
             Token::Identifier(_) => self.parse_identifier_expression(),
             Token::Integer(_) => self.parse_integer_expression(),
             Token::True | Token::False => self.parse_boolean_expression(),
-            Token::Bang | Token::Minus | Token::Cardinal => self.parse_prefix_expression(),
+            Token::Plus | Token::Bang | Token::Minus | Token::Cardinal => {
+                self.parse_prefix_expression()
+            }
             Token::If => self.parse_if_expression(),
             Token::Fn => self.parse_function_expression(),
             Token::LeftParen => self.parse_grouped_expression(),

@@ -18,7 +18,7 @@ pub fn start(eval: bool) {
             let mut ev = evaluator::Evaluator::new();
             let evaluated = ev.eval(&program);
             match evaluated {
-                Some(object) => object.inspect(),
+                Some(object) => println!("{}", object),
                 None => (),
             }
         } else {

@@ -1,4 +1,5 @@
 use super::*;
+use std::fmt;
 #[derive(Debug)]
 pub enum Object {
     Null,
@@ -8,16 +9,17 @@ pub enum Object {
     // TODO: List
     List(Vec<Object>),
     // TODO: Type (represented as an enum?)
-    Type(Vec<Identifier>),
+    // Type(Vec<Identifier>),
 }
 
-impl Object {
-    pub fn inspect(&self) {
-        return match self {
-            Object::Integer(value) => println!("OK {:?}", value),
-            Object::Boolean(value) => println!("OK {:?}", value),
-            Object::String(value) => println!("OK {:?}", value),
-            _ => println!("ERR Object Not Parsed"),
-        };
+impl fmt::Display for Object {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Object::Null => write!(f, "null"),
+            Object::Integer(ref value) => write!(f, "{}", value),
+            Object::Boolean(ref value) => write!(f, "{}", value),
+            Object::String(ref value) => write!(f, "{}", value),
+            Object::List(ref value) => write!(f, "{:?}", value),
+        }
     }
 }
