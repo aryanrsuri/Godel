@@ -6,6 +6,7 @@ pub enum Object {
     Integer(i64),
     Boolean(bool),
     String(String),
+    Return(Box<Object>),
     // TODO: List
     List(Vec<Object>),
     // TODO: Type (represented as an enum?)
@@ -19,6 +20,7 @@ impl fmt::Display for Object {
             Object::Integer(ref value) => write!(f, "{}", value),
             Object::Boolean(ref value) => write!(f, "{}", value),
             Object::String(ref value) => write!(f, "{}", value),
+            Object::Return(ref value) => write!(f, "{}", value),
             Object::List(ref value) => write!(f, "{:?}", value),
         }
     }

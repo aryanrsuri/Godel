@@ -1,0 +1,35 @@
+let TrafficLight = type
+    | Red
+    | Yellow
+    | Green
+;
+
+let next_state = fn light -> match light
+    | Red -> Green
+    | Green -> Yellow
+    | Yellow -> Red
+;
+
+let state_to_string = fn light -> match light
+    | Red -> "Red"
+    | Yellow -> "Yellow"
+    | Green -> "Green"
+;
+
+let traffic_lights = for { x <- [0..5] : Red };
+
+let simulate = fn lights, steps -> {
+    let simulate_helper = fn lights, step -> 
+        if step == 0 {
+            lights
+        } else {
+            let next_lights = for { light <- lights : next_state(light) };
+            simulate_helper(next_lights, step - 1)
+        };
+    simulate_helper(lights, steps)
+};
+
+let final_states = simulate(traffic_lights, 10);
+let final_states_str = for { light <- final_states : state_to_string(light) };
+final_states_str;
+
