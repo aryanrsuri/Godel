@@ -33,6 +33,10 @@ impl Evaluator {
     pub fn eval_statement(&mut self, statement: &Statement) -> Option<Object> {
         match statement {
             Statement::Expression(expression) => self.eval_expression(expression),
+            Statement::Return(expression) => match self.eval_expression(expression) {
+                Some(value) => Some(Object::Return(Box::new(value))),
+                None => return None,
+            },
             _ => None,
         }
     }
@@ -60,7 +64,6 @@ impl Evaluator {
             _ => unreachable!("Only Literal(int,bool,string) works"),
         }
     }
-
     pub fn eval_if(
         &mut self,
         condition: &Expression,
